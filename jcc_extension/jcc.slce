@@ -1,0 +1,10 @@
+id: jcc
+version: "1.0.0"
+label: JCC SDK Extension
+description: >
+  my components
+component_path:
+  - path: "./component"
+sdk:
+  id: "gecko_sdk"
+  version: "4.2.0"

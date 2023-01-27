@@ -1,0 +1,40 @@
+#include "em_device.h"
+#include "em_cmu.h"
+#include "em_gpio.h"
+#include "em_prs.h"
+
+// Include instance(s) config(s) {# Include instance config #}
+{% for instance in radioprs_instances %} #include "radioprs_{{ instance }}_config.h"
+{% endfor %}
+
+{# Init function #}
+void sl_radioprs_init_instances(void)
+{
+  CMU_ClockEnable(cmuClock_PRS, true);
+  CMU_ClockEnable(cmuClock_GPIO, true);
+
+  // radioprs instance(s) init(s) {# Initialize radioprs instance(s) #}
+  {% for instance in radioprs_instances %}
+  //begin radioprs_init_{{ instance }}();
+
+  GPIO_PinModeSet( RADIOPRS_{{ instance | upper }}_PORT, RADIOPRS_{{ instance | upper }}_PIN, gpioModePushPull, 0);
+  PRS_SourceSignalSet( RADIOPRS_{{ instance | upper }}_CHANNEL, \
+                     (RADIOPRS_{{ instance | upper }}_SOURCESEL & _PRS_CH_CTRL_SOURCESEL_MASK), \
+                      (RADIOPRS_{{ instance | upper }}_SOURCESEL & _PRS_CH_CTRL_SIGSEL_MASK), \
+                      prsEdgeOff );
+
+  #if ( (RADIOPRS_{{ instance | upper }}_CHANNEL >= 0) && (RADIOPRS_{{ instance | upper }}_CHANNEL <  4) )
+  PRS->ROUTELOC0 &= ~ (0x3F<<(RADIOPRS_{{ instance | upper }}_CHANNEL*8));
+  PRS->ROUTELOC0 |= (RADIOPRS_{{ instance | upper }}_LOC<<(RADIOPRS_{{ instance | upper }}_CHANNEL*8));
+  #elif ( (RADIOPRS_{{ instance | upper }}_CHANNEL >= 4) && (RADIOPRS_{{ instance | upper }}_CHANNEL <  8) )
+  PRS->ROUTELOC1 &= ~(0x3F<<((RADIOPRS_{{ instance | upper }}_CHANNEL-4)*8));
+  PRS->ROUTELOC1 |= (RADIOPRS_{{ instance | upper }}_LOC<<((RADIOPRS_{{ instance | upper }}_CHANNEL-4)*8));
+  #elif ( (RADIOPRS_{{ instance | upper }}_CHANNEL >= 8) && (RADIOPRS_{{ instance | upper }}_CHANNEL <  12) )
+  PRS->ROUTELOC2 &= ~(0x3F<<((RADIOPRS_{{ instance | upper }}_CHANNEL-8)*8));
+  PRS->ROUTELOC2 |= (RADIOPRS_{{ instance | upper }}_LOC<<((RADIOPRS_{{ instance | upper }}_CHANNEL-8)*8));
+  #endif
+  PRS->ROUTEPEN |= 0x01 << RADIOPRS_{{ instance | upper }}_CHANNEL;
+
+  //end radioprs_init_{{ instance }}();
+  {% endfor %}
+}

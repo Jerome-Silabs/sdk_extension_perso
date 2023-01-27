@@ -1,0 +1,36 @@
+id: "radioprs"
+label: "RADIOPRS"
+package: platform
+description: >
+  Helper for setting Radio debug PRS signals.
+category: "Radio"
+quality: internal
+instantiable:
+  prefix: inst
+root_path: "./radioprs"
+config_file:
+  - path: "config/s1/radioprs_{{instance}}_config.h"
+    condition: [ 'device_series_1' ]
+  - path: "config/s2/radioprs_{{instance}}_config.h"
+    condition: [ 'device_series_2' ]
+template_file:
+  - path: template/s1/sl_radioprs_init_instances.c.jinja
+    condition: [ 'device_series_1' ]
+  - path: template/s2/sl_radioprs_init_instances.c.jinja
+    condition: [ 'device_series_2' ]
+  - path: template/sl_radioprs_init_instances.h.jinja
+template_contribution:
+  - name: radioprs_instances
+    value: "{{instance}}"
+  - name: event_handler
+    value:
+      event: platform_init
+      include: sl_radioprs_init_instances.h
+      handler: sl_radioprs_init_instances
+    priority: -9800
+provides:
+  - name: radioprs
+    allow_multiple: true
+requires:
+  - name: "emlib_prs"
+  - name: "emlib_gpio"
