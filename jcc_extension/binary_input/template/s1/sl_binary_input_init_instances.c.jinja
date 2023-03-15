@@ -1,0 +1,23 @@
+#include "em_device.h"
+#include "em_cmu.h"
+#include "em_gpio.h"
+
+
+// Include instance(s) config(s) {# Include instance config #}
+{% for instance in binary_input_instances %} #include "binary_input_{{ instance }}_config.h"
+{% endfor %}
+
+{# Init function #}
+void sl_binary_input_init_instances(void)
+{
+  CMU_ClockEnable(cmuClock_GPIO, true);
+
+  // binary_input instance(s) init(s) {# Initialize binary_input instance(s) #}
+  {% for instance in binary_input_instances %}
+  //begin binary_input_init_{{ instance }}();
+
+  GPIO_PinModeSet( BINARY_INPUT_{{ instance | upper }}_PORT, BINARY_INPUT_{{ instance | upper }}_PIN, BINARY_INPUT_{{ instance | upper }}_MODE, BINARY_INPUT_{{ instance | upper }}_MODE_PULL);
+
+    //end binary_input_init_{{ instance }}();
+  {% endfor %}
+}

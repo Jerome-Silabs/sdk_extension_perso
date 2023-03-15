@@ -1,0 +1,36 @@
+id: "binary_input"
+label: "Binary Input"
+package: platform
+description: >
+  Helper for setting GPIO as a binary input.
+category: "Platform|Service"
+quality: "alpha"
+instantiable:
+  prefix: inst
+root_path: "./binary_input"
+config_file:
+  - path: "config/s1/binary_input_{{instance}}_config.h"
+    condition: [ 'device_series_1' ]
+  - path: "config/s2/binary_input_{{instance}}_config.h"
+    condition: [ 'device_series_2' ]
+template_file:
+  - path: template/s1/sl_binary_input_init_instances.c.jinja
+    condition: [ 'device_series_1' ]
+  - path: template/s2/sl_binary_input_init_instances.c.jinja
+    condition: [ 'device_series_2' ]
+  - path: template/sl_binary_input_init_instances.h.jinja
+template_contribution:
+  - name: binary_input_instances
+    value: "{{instance}}"
+  - name: event_handler
+    value:
+      event: platform_init
+      include: sl_binary_input_init_instances.h
+      handler: sl_binary_input_init_instances
+    priority: -9800
+provides:
+  - name: binary_input
+    allow_multiple: true
+requires:
+  - name: "emlib_cmu"
+  - name: "emlib_gpio"
